@@ -1,0 +1,100 @@
+\documentclass[a4paper, 12pt]{article}
+\usepackage[swedish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{verbatim}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{parskip}
+% Include pdf with multiple pages ex \includepdf[pages=-, nup=2x2]{filename.pdf}
+\usepackage[final]{pdfpages}
+% Place figures where they should be
+\usepackage{float}
+
+% vars
+\def\title{Plugin 1.2}
+\def\preTitle{Laboration 1}
+\def\kurs{Applikationsprogrammering i Java, HT-08}
+
+\def\namn{Anton Johansson}
+\def\mail{dit06ajn@cs.umu.se}
+\def\pathToCode{$
+\sim$dit06ajn/edu/apjava/lab1}
+
+\def\handledareEtt{Johan Eliasson johane@cs.umu.se}
+\def\inst{datavetenskap}
+\def\dokumentTyp{Laborationsrapport}
+
+\begin{document}
+\begin{titlepage}
+  \thispagestyle{empty}
+  \begin{small}
+    \begin{tabular}{@{}p{\textwidth}@{}}
+      UMEÅ UNIVERSITET \hfill \today \\
+      Institutionen för \inst \\
+      \dokumentTyp \\
+    \end{tabular}
+  \end{small}
+  \vspace{10mm}
+  \begin{center}
+    \LARGE{\preTitle} \\
+    \huge{\textbf{\kurs}} \\
+    \vspace{10mm}
+    \LARGE{\title} \\
+    \vspace{15mm}
+    \begin{large}
+        \namn, \mail \\
+        \pathToCode
+    \end{large}
+    \vfill
+    \large{\textbf{Handledare}}\\
+    \mbox{\large{\handledareEtt}}
+  \end{center}
+\end{titlepage}
+
+\pagestyle{fancy}
+\rhead{\today}
+\lhead{\namn, \mail}
+\chead{}
+\lfoot{}
+\cfoot{}
+\rfoot{}
+
+\tableofcontents
+\newpage
+
+\rfoot{\thepage}
+\pagenumbering{arabic}
+
+\section{Problemspecifikation}
+% Beskriv med egna ord vad uppgiften gick ut på. Är det någonting som
+% varit oklart och ni gjort egna tolkningar så beskriv dessa.
+
+\section{Användarhandledning}
+% Förklara var programmet och källkoden ligger samt hur man startar,
+% kompilerar och använder det.
+
+\section{Systembeskrivning}
+% Beskriv översiktligt hur programmet är uppbyggt och hur det löser
+% problemet.
+
+\section{Begränsningar}
+% Vilka problem och begränsningar har din lösning av uppgiften? Hur
+% skulle de kunna rättas till?
+
+\section{Reflektioner}
+% Var det något som var speciellt krångligt? Vilka problem uppstod och
+% hur löste ni dem? Allmänna synpunkter. Hur skulle man kunna använda
+% dessa metoder i andra mer omfattande system?
+
+\section{Testkörningar}
+%Noggranna testkörningar där man ser att programmet fungerar som det ska.
+
+\section{Diskussion}
+% Hur fungerade det att följa en kodkonvention? Vilka var fördelarna
+% respektive nackdelarna?
+
+\section{Källkod}
+% Källkoden ska finnas tillgänglig i er hemkatalog
+% ~/edu/apjava/lab1/. Bifoga även utskriven källkod. Rekommenderat är
+% att ni skriver ut den med kommandot
+\end{document}
