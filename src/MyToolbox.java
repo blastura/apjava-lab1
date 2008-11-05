@@ -1,6 +1,6 @@
 /*
  * @(#)MyToolbox.java
- * Time-stamp: "2008-11-05 19:34:20 anton"
+ * Time-stamp: "2008-11-05 21:36:43 anton"
  */
 
 import javax.swing.JFrame;
@@ -15,10 +15,7 @@ import java.awt.GridLayout;
  * @version 1.0
  */
 public class MyToolbox {
-   /**
-    * Creates a new MyToolbox instance.
-    *
-    */
+   /** Creates a new MyToolbox instance. */
    public MyToolbox() {
       JPanel panel = new JPanel(new GridLayout(4, 1));
       JTextField descField = new JTextField("descField");
