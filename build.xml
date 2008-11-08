@@ -59,4 +59,9 @@
       <arg value="Stringer"/>
     </java>
   </target>
+
+  <target name="print-classpath">
+    <property name="classpath" refid="project.classpath"/>
+    <echo message="-classpath-${classpath}-classpath-"/>
+  </target>
 </project>
