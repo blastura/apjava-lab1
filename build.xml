@@ -21,6 +21,10 @@
     <mkdir dir="${build.test.dir}"/>
   </target>
 
+  <target name="clean"> 
+    <delete dir="${build.dir}" /> 
+  </target> 
+
   <target name="compile" depends="prepare">
     <javac srcdir="${src.dir}" destdir="${build.prod.dir}" debug="on">
       <classpath refid="project.classpath" />
@@ -56,7 +60,7 @@
   <target name="run" description="Run MyToolbox" depends="compile">
     <java classname="MyToolbox" fork="true">
       <classpath refid="project.classpath" />
-      <arg value="Stringer"/>
+      <arg value="Calc"/>
     </java>
   </target>
 
