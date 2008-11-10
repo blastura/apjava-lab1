@@ -1,24 +1,25 @@
 /*
- * @(#)ClassInspector.java
- * Time-stamp: "2008-11-10 00:36:46 anton"
+ * @(#)ClassHandler.java
+ * Time-stamp: "2008-11-10 20:22:47 anton"
  */
 
-import java.lang.reflect.Method;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
- * Describe class <code>ClassInspector</code> here.
+ * Describe class <code>ClassHandler</code> here.
  *
  * @author dit06ajn@cs.umu.se
  * @version 1.0
  */
-public class ClassInspector {
+public class ClassHandler {
     private Class<?> c;
     private Object cI;
     private Method[] methods;
 
     /**
-     * Creates a new <code>ClassInspector</code> instance.
+     * Creates a new <code>ClassHandler</code> instance.
      *
      * @param className a <code>String</code> value which should link
      * to a java class existing in classpath. The class should
@@ -26,9 +27,9 @@ public class ClassInspector {
      * with no parameters is required.
      * @exception Exception if an error occurs
      */
-    public ClassInspector(String className) throws ClassNotFoundException,
-                                                   InstantiationException,
-                                                   IllegalAccessException {
+    public ClassHandler(String className) throws ClassNotFoundException,
+                                                 InstantiationException,
+                                                 IllegalAccessException {
         this.c = Class.forName(className);
         this.cI  = c.newInstance();
         
@@ -47,29 +48,34 @@ public class ClassInspector {
 
     public Object invoke(Method method, String[] args)
         throws IllegalAccessException,
-               InvocationTargetException {
-        // Get all parameters for current method
+               InvocationTargetException,
+               NoSuchMethodException,
+               InstantiationException {
+
+        // Store the Class for each parameter in method.
         Class<?>[] typeParams = method.getParameterTypes();
+        
+        // For storing type converted parameters.
+        Object[] params = new Object[typeParams.length];
+        
         if (args.length != typeParams.length) {
             // TODO params are missing
-            return "You should provide "
-                + typeParams.length
-                + " parameter(s) to excecute this method";
+            throw new IllegalArgumentException("You should provide "
+                                               + typeParams.length
+                                               + " parameter(s) to excecute this method");
         }
-        Object[] params = new Object[typeParams.length];
         for (int i = 0; i < typeParams.length; i++) {
-            // If cast fails values will be null
-            Object parameter = typeParams[i];
+            Class<?> paramClass = typeParams[i];
             
-            if (parameter.equals(java.lang.String.class)) {
-                params[i] = args[i];
-            }
-            else if (parameter.equals(java.lang.Integer.class)) {
-                params[i] = Integer.valueOf(args[i]);
-            }
-             else if (parameter.equals(java.lang.Double.class)) {
-                params[i] = Double.valueOf(args[i]);
-             }
+            // Required: Constructor that takes a String as its only
+            // parameter, NoSuchMethodException thrown otherwise.
+            Constructor<?> con =
+                paramClass.getConstructor(java.lang.String.class);
+            
+            // Could (but shouldn't) throw InstantiationException
+            // since NoSuchMethodException should be thrown above
+            // first.
+            params[i] = con.newInstance(args[i]);
         }
         return method.invoke(cI, params);
     }

@@ -1,6 +1,6 @@
 /*
  * @(# )MyToolbox.java
- * Time-stamp: "2008-11-10 00:39:39 anton"
+ * Time-stamp: "2008-11-10 22:21:10 anton"
  */
 
 import java.awt.BorderLayout;
@@ -27,18 +27,18 @@ public class MyToolbox extends JFrame {
                                               InstantiationException {
         super("MyToolbox: "+ className);
         // could throw Exceptions
-        final ClassInspector classInspector = new ClassInspector(className);
-            
+        final ClassHandler classHandler = new ClassHandler(className);
+
         // Upper panel
         JPanel upperPanel = new JPanel(new BorderLayout());
-        JTextField descField = new JTextField(classInspector.getDescription());
+        JTextField descField = new JTextField(classHandler.getDescription());
         JTextField paramField = new JTextField("paramField");
         upperPanel.add(descField, BorderLayout.NORTH);
         upperPanel.add(paramField, BorderLayout.SOUTH);
 
         // Lower panel
         JPanel lowerPanel = new JPanel(new BorderLayout());
-        final JList methodList = new JList(classInspector.getMethods());
+        final JList methodList = new JList(classHandler.getMethods());
         methodList.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent ev) {
@@ -50,14 +50,21 @@ public class MyToolbox extends JFrame {
                         // + methodClicked);
                         try {
                             System.out.println("Invoke "
-                                               + classInspector.invoke(methodClicked,
-                                                                       new String[] {"1", "2"}));
-                        }
-                        catch (IllegalAccessException e) {
+                                + classHandler.invoke(methodClicked,
+                                                        new String[] {"2", "2"}));
+                        } catch (IllegalArgumentException e) {
+                            // TODO
+                            System.out.println(e.getMessage());
+                        } catch (InstantiationException e) {
                             // TODO
                             e.printStackTrace();
-                        }
-                        catch (InvocationTargetException e) {
+                        } catch (NoSuchMethodException e) {
+                            // TODO
+                            e.printStackTrace();
+                        } catch (IllegalAccessException e) {
+                            // TODO
+                            e.printStackTrace();
+                        } catch (InvocationTargetException e) {
                             // TODO
                             e.printStackTrace();
                         }
@@ -90,23 +97,19 @@ public class MyToolbox extends JFrame {
         if (args.length == 1) {
             try {
                 new MyToolbox(args[0]);
-            }
-            catch (ClassNotFoundException e) {
+            } catch (ClassNotFoundException e) {
                 System.out.println("Class not found");
                 e.printStackTrace();
                 System.exit(0);
-            }
-            catch (InstantiationException e) {
+            } catch (InstantiationException e) {
                 System.out.println("Could not create an instance of this class");
                 e.printStackTrace();
                 System.exit(0);
-            }
-            catch (IllegalAccessException e) {
+            } catch (IllegalAccessException e) {
                 e.printStackTrace();
                 System.exit(0);
             }
-        }
-        else {
+        } else {
             System.err.println("You must supply one (and only one) Class name");
             System.exit(0);
         }
