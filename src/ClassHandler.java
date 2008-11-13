@@ -1,6 +1,6 @@
 /*
  * @(#)ClassHandler.java
- * Time-stamp: "2008-11-10 20:22:47 anton"
+ * Time-stamp: "2008-11-13 03:21:38 anton"
  */
 
 import java.lang.reflect.Constructor;
@@ -14,38 +14,51 @@ import java.lang.reflect.Method;
  * @version 1.0
  */
 public class ClassHandler {
-    private Class<?> c;
     private Object cI;
     private Method[] methods;
 
     /**
-     * Creates a new <code>ClassHandler</code> instance.
+     * Creates a new ClassHandler instance which creates an instance
+     * of the specified class in the parameter className and stores
+     * it's methods in an array.
      *
-     * @param className a <code>String</code> value which should link
-     * to a java class existing in classpath. The class should
-     * implement the interface Plugable, and at least one constructor
-     * with no parameters is required.
-     * @exception Exception if an error occurs
+     * @param className should point to a java class existing in
+     * classpath. The class should implement the interface Plugable,
+     * and at least one constructor which take no parameters is
+     * required.
+     * @exception ClassNotFoundException if the specified className is
+     * not a Class in classpath.
+     * @exception InstantiationException if the specified Class
+     * doesn't have a constructor without parameters.
+     * @exception IllegalAccessException if TODO
      */
     public ClassHandler(String className) throws ClassNotFoundException,
                                                  InstantiationException,
                                                  IllegalAccessException {
-        this.c = Class.forName(className);
-        this.cI  = c.newInstance();
-        
-        // Get all methods
-        this.methods = c.getDeclaredMethods();
-        for (int i = 0, length = methods.length; i < length; i++) {
-            System.out.println(methods[i]);
+        // Get Class of className
+        // Throws: ClassNotFoundException, IllegalAccessException
+        Class<?> c = Class.forName(className);
 
-            // Get all parameters for current method
-            Class<?>[] params = methods[i].getParameterTypes();
-            for (int j = 0; j < params.length; j++) {
-                System.out.println("   \\-" + params[j]);
-            }
-        }
+        // Get all declared methods
+        this.methods = c.getDeclaredMethods();
+        
+        // Create a new instance.
+        // Require: A constructor without parameters,
+        // Throws: InstantiationException
+        this.cI  = c.newInstance();
     }
 
+    /**
+     * Describe <code>invoke</code> method here.
+     *
+     * @param method a <code>Method</code> value
+     * @param args a <code>String</code> value
+     * @return an <code>Object</code> value
+     * @exception IllegalAccessException if an error occurs
+     * @exception InvocationTargetException if an error occurs
+     * @exception NoSuchMethodException if an error occurs
+     * @exception InstantiationException if an error occurs
+     */
     public Object invoke(Method method, String[] args)
         throws IllegalAccessException,
                InvocationTargetException,
@@ -64,6 +77,9 @@ public class ClassHandler {
                                                + typeParams.length
                                                + " parameter(s) to excecute this method");
         }
+        
+        // Loop through all typeParams and args to create an array
+        // containing arguments converted to the required class.
         for (int i = 0; i < typeParams.length; i++) {
             Class<?> paramClass = typeParams[i];
             
@@ -79,7 +95,7 @@ public class ClassHandler {
         }
         return method.invoke(cI, params);
     }
-    
+
     public String getDescription() {
         if (cI instanceof Plugable) {
             return ((Plugable) cI).getDescription();
@@ -89,7 +105,27 @@ public class ClassHandler {
         }
     }
     
+    /**
+     * Returns all the methods of the class stored in this
+     * ClassHandler.
+     *
+     * @return an array of all the methods of the classed stored in
+     * this ClassHandler.
+     */
     public Method[] getMethods() {
         return this.methods;
+    }
+
+    // TODO
+    public void printMethods() {
+        for (int i = 0, length = methods.length; i < length; i++) {
+            System.out.println(methods[i]);
+            
+            // Get all parameters for current method
+            Class<?>[] params = methods[i].getParameterTypes();
+            for (int j = 0; j < params.length; j++) {
+                System.out.println("   \\-" + params[j]);
+            }
+        }
     }
 }

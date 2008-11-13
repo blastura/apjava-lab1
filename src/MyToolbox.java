@@ -1,18 +1,23 @@
 /*
  * @(# )MyToolbox.java
- * Time-stamp: "2008-11-10 22:21:10 anton"
+ * Time-stamp: "2008-11-13 03:23:30 anton"
  */
 
 import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import javax.swing.ListSelectionModel;
 
 /**
  * Describe class MyToolbox here.
@@ -21,72 +26,115 @@ import javax.swing.JTextField;
  * @version 1.0
  */
 public class MyToolbox extends JFrame {
-    /** Creates a new MyToolbox instance. */
+    private ClassHandler classHandler;
+    private JTextField paramField;
+    private JList methodList;
+    
+    /** TODO. Creates a new MyToolbox instance. */
     public MyToolbox(String className) throws ClassNotFoundException,
                                               IllegalAccessException,
                                               InstantiationException {
         super("MyToolbox: "+ className);
         // could throw Exceptions
-        final ClassHandler classHandler = new ClassHandler(className);
+        this.classHandler = new ClassHandler(className);
 
         // Upper panel
         JPanel upperPanel = new JPanel(new BorderLayout());
         JTextField descField = new JTextField(classHandler.getDescription());
-        JTextField paramField = new JTextField("paramField");
+        descField.setEditable(false);
+        
+        this.paramField
+            = new JTextField("Type parameters here, separated by ' ' or ','");
+        paramField.addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyReleased(KeyEvent ev) {
+                    // Releasing ENTER key
+                    if (ev.getKeyCode() == KeyEvent.VK_ENTER) {
+                        invokeSelectedMethod();
+                    }
+                }
+            });
         upperPanel.add(descField, BorderLayout.NORTH);
         upperPanel.add(paramField, BorderLayout.SOUTH);
 
         // Lower panel
         JPanel lowerPanel = new JPanel(new BorderLayout());
-        final JList methodList = new JList(classHandler.getMethods());
+        this.methodList = new JList(classHandler.getMethods());
+        methodList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        methodList.setSelectedIndex(0);
         methodList.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent ev) {
                     if (ev.getClickCount() == 2) {
-                        int index = methodList.locationToIndex(ev.getPoint());
-                        Method methodClicked =
-                            (Method) methodList.getModel().getElementAt(index);
-                        // System.out.println("Double clicked on Item "
-                        // + methodClicked);
-                        try {
-                            System.out.println("Invoke "
-                                + classHandler.invoke(methodClicked,
-                                                        new String[] {"2", "2"}));
-                        } catch (IllegalArgumentException e) {
-                            // TODO
-                            System.out.println(e.getMessage());
-                        } catch (InstantiationException e) {
-                            // TODO
-                            e.printStackTrace();
-                        } catch (NoSuchMethodException e) {
-                            // TODO
-                            e.printStackTrace();
-                        } catch (IllegalAccessException e) {
-                            // TODO
-                            e.printStackTrace();
-                        } catch (InvocationTargetException e) {
-                            // TODO
-                            e.printStackTrace();
-                        }
+                        invokeSelectedMethod();
                     }
                 }
             });
         lowerPanel.add(methodList, BorderLayout.NORTH);
-        JTextArea consoleOut = new JTextArea("hej och hå \n detta är text");
-        lowerPanel.add(consoleOut, BorderLayout.CENTER);
 
+        // Textarea for output
+        JTextArea textArea = new JTextArea();
+        // Default number of rows TODO hardcoded.
+        textArea.setRows(20);
+        textArea.setColumns(40);
+        textArea.setEditable(false);
+        JScrollPane scrollPaneForTextArea = new JScrollPane(textArea);
+        // TODO size
+        // scrollPaneForTextArea.setPreferredSize(new Dimension(200, 200));
+        lowerPanel.add(scrollPaneForTextArea, BorderLayout.CENTER);
+
+        // Redirect System.out to textArea
+        PrintStream guiOutPrintStream =
+            new PrintStream(new WriterOutputStream(new TextAreaWriter(textArea)));
+        System.setOut(guiOutPrintStream);
+        
         // Final panel
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(upperPanel, BorderLayout.NORTH);
         panel.add(lowerPanel, BorderLayout.CENTER);
-
+        
         // Frame
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.getContentPane().add(panel);
         this.pack();
         this.setVisible(true);
     }
-
+    
+    public void invokeSelectedMethod() {
+        if (methodList.isSelectionEmpty()) {
+            System.out.println("No method is selected");
+            return;
+        }
+        Method method = (Method) methodList.getSelectedValue();
+        
+        // Read and parse paramField TODO
+        String[] params =
+            paramField.getText().split(" +|, *");
+        
+        try {
+            Object ret = classHandler.invoke(method,
+                                             params);
+            System.out.println("Method returned : " + ret);
+        } catch (IllegalArgumentException e) {
+            // TODO
+            System.out.println(e.getMessage());
+        } catch (InstantiationException e) {
+            // TODO
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            // TODO
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            // TODO
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            // TODO linelength?
+            System.out.println("Parameters can't be converted"
+                               + "from a String to required class");
+            e.printStackTrace();
+        }
+    }
+    
     /**
      * Starts the program.
      *
@@ -106,6 +154,7 @@ public class MyToolbox extends JFrame {
                 e.printStackTrace();
                 System.exit(0);
             } catch (IllegalAccessException e) {
+                // TODO
                 e.printStackTrace();
                 System.exit(0);
             }

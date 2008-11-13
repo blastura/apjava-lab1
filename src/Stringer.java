@@ -7,7 +7,7 @@ public class Stringer implements Plugable {
    }
 
    public void conc (String a, String b) {
-      System.out.println (b + " " + a);
+      System.out.println (a + " " + b);
    }
 
    public void backwards (String a) {
