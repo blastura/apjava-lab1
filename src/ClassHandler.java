@@ -1,36 +1,44 @@
 /*
  * @(#)ClassHandler.java
- * Time-stamp: "2008-11-13 03:21:38 anton"
+ * Time-stamp: "2008-11-13 23:38:16 anton"
  */
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.logging.Logger;
+import java.util.List;
 
 /**
- * Describe class <code>ClassHandler</code> here.
+ * ClassHandler is responsible for instanciating and interacting with a supplied
+ * Class.
  *
  * @author dit06ajn@cs.umu.se
  * @version 1.0
  */
 public class ClassHandler {
     private Object cI;
-    private Method[] methods;
-
+    private ArrayList<Method> methods;
+    private static Logger logger = Logger.getLogger("mytoolbox");
+    
     /**
      * Creates a new ClassHandler instance which creates an instance
      * of the specified class in the parameter className and stores
-     * it's methods in an array.
+     * it's methods in an ArrayList.
      *
-     * @param className should point to a java class existing in
-     * classpath. The class should implement the interface Plugable,
-     * and at least one constructor which take no parameters is
-     * required.
-     * @exception ClassNotFoundException if the specified className is
-     * not a Class in classpath.
-     * @exception InstantiationException if the specified Class
-     * doesn't have a constructor without parameters.
-     * @exception IllegalAccessException if TODO
+     * @param className Should point to a java class existing in classpath. The
+     *                  class should implement the interface Plugable, and at
+     *                  least one constructor which take no parameters is
+     *                  required.
+     * @exception ClassNotFoundException If the specified className is not a
+     *                                   Class in classpath.
+     * @exception InstantiationException If the specified Class doesn't have a
+     *                                    constructor without parameters.
+     * @exception IllegalAccessException If the specified Class constructor
+     *                                   doesn't have access to the definition
+     *                                   of this Constructor? TODO <-
      */
     public ClassHandler(String className) throws ClassNotFoundException,
                                                  InstantiationException,
@@ -38,9 +46,31 @@ public class ClassHandler {
         // Get Class of className
         // Throws: ClassNotFoundException, IllegalAccessException
         Class<?> c = Class.forName(className);
-
+        Class<?> implInterface = Class.forName("Plugable");
+        
         // Get all declared methods
-        this.methods = c.getDeclaredMethods();
+        this.methods =
+            new ArrayList<Method>(Arrays.asList(c.getDeclaredMethods()));
+        
+        // Methods in interface TODO
+        ArrayList<Method> implMethods =
+            new ArrayList<Method>(Arrays.asList(implInterface.getDeclaredMethods()));
+
+        List<Integer> indexes = new ArrayList<Integer>();
+        // TODO remove all elements that exists in interface Plugable
+        for (Method method : methods) {
+            for (Method impMethod : implMethods) {
+                //logger.info();
+                if (method.getName().equals(impMethod.getName())) {
+                    logger.info("Method will be removed: " + method.getName());
+                    indexes.add(methods.indexOf(method));
+                }
+            }
+        }
+
+        for (int index : indexes) {
+            methods.remove(index);
+        }
         
         // Create a new instance.
         // Require: A constructor without parameters,
@@ -49,22 +79,35 @@ public class ClassHandler {
     }
 
     /**
-     * Describe <code>invoke</code> method here.
+     * Creates new instances of the arguments in <code>args</code> with regard
+     * to the required pamreter types in the supplied Method
+     * <code>method</code>.
      *
-     * @param method a <code>Method</code> value
-     * @param args a <code>String</code> value
-     * @return an <code>Object</code> value
-     * @exception IllegalAccessException if an error occurs
-     * @exception InvocationTargetException if an error occurs
-     * @exception NoSuchMethodException if an error occurs
-     * @exception InstantiationException if an error occurs
+     * @param method The Method to invoke.
+     * @param args A String representation of the parameters required to invoke
+     *             <code>method</code>.
+     * @return The value returned by the invoked Method, if the Method doesn't
+     *         return a value, this will be null.
+     * @exception IllegalAccessException If the specified method doesn't have
+     *                                   access to the instanciated Class in
+     *                                   this ClassHandler. TODO <-
+     * @exception InvocationTargetException If an exception is thrown in the
+     *                                      invoked Method, the Exception is
+     *                                      wrapped in this
+     *                                      InvocationTargetException.
+     * @exception NoSuchMethodException If the Class stored in this ClassHandler
+     *                                  doesn't have the supplied Method.
+     * @exception InstantiationException If one of the argumetns supplied in
+     *                                   <code>args</code> can't be converted
+     *                                   from a String to the required Class to
+     *                                   be used as a parameter in
+     *                                   <code>method</code>.                      
      */
     public Object invoke(Method method, String[] args)
         throws IllegalAccessException,
                InvocationTargetException,
                NoSuchMethodException,
                InstantiationException {
-
         // Store the Class for each parameter in method.
         Class<?>[] typeParams = method.getParameterTypes();
         
@@ -73,59 +116,52 @@ public class ClassHandler {
         
         if (args.length != typeParams.length) {
             // TODO params are missing
-            throw new IllegalArgumentException("You should provide "
-                                               + typeParams.length
-                                               + " parameter(s) to excecute this method");
+            throw new IllegalArgumentException(typeParams.length
+                                               + " parameter(s) is required to"
+                                               + " to excecute this method");
         }
-        
-        // Loop through all typeParams and args to create an array
-        // containing arguments converted to the required class.
+
+        // Loop through all typeParams and args to create an array containing
+        // arguments converted to the required class.
         for (int i = 0; i < typeParams.length; i++) {
             Class<?> paramClass = typeParams[i];
             
-            // Required: Constructor that takes a String as its only
-            // parameter, NoSuchMethodException thrown otherwise.
+            // Required: Constructor that takes a String as its only parameter,
+            // NoSuchMethodException thrown otherwise.
             Constructor<?> con =
                 paramClass.getConstructor(java.lang.String.class);
             
-            // Could (but shouldn't) throw InstantiationException
-            // since NoSuchMethodException should be thrown above
-            // first.
+            // Could (but shouldn't) throw InstantiationException since
+            // NoSuchMethodException should be thrown above
+            // first. InvocationTargetException is thrown if the supplied value
+            // can't be used to create this instance, ex new Integer("foo").
             params[i] = con.newInstance(args[i]);
         }
+        // Could throw IllegalAccessException, InvocationTargetException
         return method.invoke(cI, params);
     }
 
+    /**
+     * Returns the describtion of the loaded Class. This requires the Class to
+     * implement the interface Plugable.
+     *
+     * @return The describtion of the supplied class.
+     */
     public String getDescription() {
         if (cI instanceof Plugable) {
             return ((Plugable) cI).getDescription();
-        }
-        else {
+        } else {
             return "Class does not implement Plugable, no describtion found";
         }
     }
     
     /**
-     * Returns all the methods of the class stored in this
-     * ClassHandler.
+     * Returns all the methods of the class stored in this ClassHandler.
      *
-     * @return an array of all the methods of the classed stored in
-     * this ClassHandler.
+     * @return An array of all the methods of the classed stored in this
+     *         ClassHandler.
      */
     public Method[] getMethods() {
-        return this.methods;
-    }
-
-    // TODO
-    public void printMethods() {
-        for (int i = 0, length = methods.length; i < length; i++) {
-            System.out.println(methods[i]);
-            
-            // Get all parameters for current method
-            Class<?>[] params = methods[i].getParameterTypes();
-            for (int j = 0; j < params.length; j++) {
-                System.out.println("   \\-" + params[j]);
-            }
-        }
+        return methods.toArray(new Method[methods.size()]);
     }
 }

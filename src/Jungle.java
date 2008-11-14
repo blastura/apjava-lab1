@@ -1,6 +1,6 @@
 /*
  * @(#)Jungle.java
- * Time-stamp: "2008-11-09 02:58:30 anton"
+ * Time-stamp: "2008-11-13 18:48:53 anton"
  */
 
 public class Jungle implements Plugable {
@@ -21,5 +21,4 @@ public class Jungle implements Plugable {
     public final String getDescription() {
         return "A simple representation of a djungle";
     }
-  
 }

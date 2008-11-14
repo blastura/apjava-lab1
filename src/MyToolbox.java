@@ -1,22 +1,24 @@
 /*
  * @(# )MyToolbox.java
- * Time-stamp: "2008-11-13 03:23:30 anton"
+ * Time-stamp: "2008-11-13 21:44:22 anton"
  */
 
 import java.awt.BorderLayout;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import javax.swing.ListSelectionModel;
 
 /**
@@ -29,12 +31,15 @@ public class MyToolbox extends JFrame {
     private ClassHandler classHandler;
     private JTextField paramField;
     private JList methodList;
+    private String splitPattern = " +|, *";
+    private static Logger logger = Logger.getLogger("mytoolbox");
     
     /** TODO. Creates a new MyToolbox instance. */
     public MyToolbox(String className) throws ClassNotFoundException,
                                               IllegalAccessException,
                                               InstantiationException {
         super("MyToolbox: "+ className);
+        
         // could throw Exceptions
         this.classHandler = new ClassHandler(className);
 
@@ -46,6 +51,10 @@ public class MyToolbox extends JFrame {
         this.paramField
             = new JTextField("Type parameters here, separated by ' ' or ','");
         paramField.addKeyListener(new KeyAdapter() {
+                /**
+                 * Run invokeSelectedMethod if ENTER is pressed in
+                 * this JTextField.
+                 */
                 @Override
                 public void keyReleased(KeyEvent ev) {
                     // Releasing ENTER key
@@ -74,13 +83,11 @@ public class MyToolbox extends JFrame {
 
         // Textarea for output
         JTextArea textArea = new JTextArea();
-        // Default number of rows TODO hardcoded.
+        // Settings for textArea
         textArea.setRows(20);
         textArea.setColumns(40);
         textArea.setEditable(false);
         JScrollPane scrollPaneForTextArea = new JScrollPane(textArea);
-        // TODO size
-        // scrollPaneForTextArea.setPreferredSize(new Dimension(200, 200));
         lowerPanel.add(scrollPaneForTextArea, BorderLayout.CENTER);
 
         // Redirect System.out to textArea
@@ -100,38 +107,57 @@ public class MyToolbox extends JFrame {
         this.setVisible(true);
     }
     
+    /**
+     * Invokes the selected method in the field JList methodList. This
+     * method handles all exceptions that could be thrown from this
+     * invocation.
+     */
     public void invokeSelectedMethod() {
         if (methodList.isSelectionEmpty()) {
             System.out.println("No method is selected");
             return;
         }
+        
         Method method = (Method) methodList.getSelectedValue();
         
         // Read and parse paramField TODO
-        String[] params =
-            paramField.getText().split(" +|, *");
-        
+        String paramFieldText = paramField.getText().trim();
+        String[] args = paramFieldText.split(splitPattern);
+
+        // If method the method requires 0 formal parameters, the
+        // supplied array must be of length 0. An emtpy JTextField
+        // always contains the empty string "".
+        if (args[0].equals("")) {
+            args = new String[] {};
+        }
+
         try {
-            Object ret = classHandler.invoke(method,
-                                             params);
-            System.out.println("Method returned : " + ret);
+            // System.out.println("Method stdout:");
+            Object ret  = classHandler.invoke(method, args);
+            logger.info("Method returned: " + ret);
         } catch (IllegalArgumentException e) {
-            // TODO
+            // The method has been passed illegal or inappropriate
+            // arguments.
             System.out.println(e.getMessage());
-        } catch (InstantiationException e) {
-            // TODO
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            // TODO
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            // TODO
-            e.printStackTrace();
         } catch (InvocationTargetException e) {
-            // TODO linelength?
-            System.out.println("Parameters can't be converted"
-                               + "from a String to required class");
+            System.out.println("Parameters can't be converted from a String to"
+                               + " the required class");
+        } catch (NoSuchMethodException e) {
+            // The class stored in classHandler doesn't have the specified
+            // method. This should never happen.
             e.printStackTrace();
+            System.exit(-1);
+        } catch (InstantiationException e) {
+            // Should never happen, NoSuchMethodException should be thrown
+            // first.
+            e.printStackTrace();
+            System.exit(-1);
+        } catch (IllegalAccessException e) {
+            // The specified method doesn't have acces to the definition of the
+            // instanciated class in classHandler. This should never
+            // happen. TODO?
+            e.printStackTrace();
+            System.exit(-1);
         }
     }
     
@@ -139,28 +165,33 @@ public class MyToolbox extends JFrame {
      * Starts the program.
      *
      * @param args should contain the name of a Class existing in
-     * current classpath.
+     * current classpath. This class should implement the interface
+     * Plugable and contain at a constructor which doesn't require
+     * parameters. If supplied argument doesn't match these requirements, 
      */
     public static void main(String[] args) {
+        Logger.getLogger("mytoolbox").setLevel(Level.INFO);
+        
         if (args.length == 1) {
             try {
                 new MyToolbox(args[0]);
             } catch (ClassNotFoundException e) {
                 System.out.println("Class not found");
-                e.printStackTrace();
-                System.exit(0);
+                //e.printStackTrace();
+                System.exit(-1);
             } catch (InstantiationException e) {
-                System.out.println("Could not create an instance of this class");
-                e.printStackTrace();
-                System.exit(0);
+                System.out.println("Could not create an instance of this class."
+                                   + " One empty constructor required.");
+                //e.printStackTrace();
+                System.exit(-1);
             } catch (IllegalAccessException e) {
                 // TODO
                 e.printStackTrace();
-                System.exit(0);
+                System.exit(-1);
             }
         } else {
             System.err.println("You must supply one (and only one) Class name");
-            System.exit(0);
+            System.exit(-1);
         }
     }
 }
