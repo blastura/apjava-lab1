@@ -1,6 +1,6 @@
 /*
  * @(# )MyToolbox.java
- * Time-stamp: "2008-11-13 21:44:22 anton"
+ * Time-stamp: "2008-11-15 15:07:47 anton"
  */
 
 import java.awt.BorderLayout;
@@ -70,7 +70,12 @@ public class MyToolbox extends JFrame {
         JPanel lowerPanel = new JPanel(new BorderLayout());
         this.methodList = new JList(classHandler.getMethods());
         methodList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        methodList.setSelectedIndex(0);
+        try {
+            methodList.setSelectedIndex(0);
+        } catch (NullPointerException e) {
+            System.out.println("Class doesn't contain any methods");
+            System.exit(-1);
+        }
         methodList.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent ev) {

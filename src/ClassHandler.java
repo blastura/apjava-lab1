@@ -1,15 +1,12 @@
 /*
  * @(#)ClassHandler.java
- * Time-stamp: "2008-11-13 23:38:16 anton"
+ * Time-stamp: "2008-11-15 15:09:26 anton"
  */
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.logging.Logger;
-import java.util.List;
 
 /**
  * ClassHandler is responsible for instanciating and interacting with a supplied
@@ -20,13 +17,13 @@ import java.util.List;
  */
 public class ClassHandler {
     private Object cI;
-    private ArrayList<Method> methods;
+    private Method[] methods;
     private static Logger logger = Logger.getLogger("mytoolbox");
     
     /**
      * Creates a new ClassHandler instance which creates an instance
      * of the specified class in the parameter className and stores
-     * it's methods in an ArrayList.
+     * it's methods in an array.
      *
      * @param className Should point to a java class existing in classpath. The
      *                  class should implement the interface Plugable, and at
@@ -43,39 +40,49 @@ public class ClassHandler {
     public ClassHandler(String className) throws ClassNotFoundException,
                                                  InstantiationException,
                                                  IllegalAccessException {
-        // Get Class of className
+        // Get Class of className, and it's implemented class
         // Throws: ClassNotFoundException, IllegalAccessException
         Class<?> c = Class.forName(className);
         Class<?> implInterface = Class.forName("Plugable");
         
         // Get all declared methods
-        this.methods =
-            new ArrayList<Method>(Arrays.asList(c.getDeclaredMethods()));
+        Method[] allMethods = c.getDeclaredMethods();
         
         // Methods in interface TODO
-        ArrayList<Method> implMethods =
-            new ArrayList<Method>(Arrays.asList(implInterface.getDeclaredMethods()));
+        Method[] implMethods = implInterface.getDeclaredMethods();
 
-        List<Integer> indexes = new ArrayList<Integer>();
-        // TODO remove all elements that exists in interface Plugable
-        for (Method method : methods) {
-            for (Method impMethod : implMethods) {
+        // To store (allMethods - implMethods)
+        this.methods = new Method[allMethods.length - implMethods.length];
+        
+        // Add all methods to array methods that exists in allMethods but not in
+        // implMethods
+        for (int i = 0; i < allMethods.length; i++) {
+            for (Method implMethod : implMethods) {
                 //logger.info();
-                if (method.getName().equals(impMethod.getName())) {
-                    logger.info("Method will be removed: " + method.getName());
-                    indexes.add(methods.indexOf(method));
+                if (!isSameMethod(allMethods[i], implMethod)) {
+                    methods[i] = allMethods[i];
+                    logger.info("Method will be in list: "
+                                + methods[i].getName());
+                } else {
+                    logger.info("Method will be removed from list: "
+                                + implMethod.getName());
                 }
             }
-        }
-
-        for (int index : indexes) {
-            methods.remove(index);
         }
         
         // Create a new instance.
         // Require: A constructor without parameters,
         // Throws: InstantiationException
         this.cI  = c.newInstance();
+    }
+    
+    /** Returns true if method has equal name, parameters and returntype, false
+     * otherwise */
+    private static boolean isSameMethod(Method m1, Method m2) {
+        return (m1.getName().equals(m2.getName()))
+            && m1.getReturnType().equals(m2.getReturnType())
+            && java.util.Arrays.equals(m1.getParameterTypes(),
+                                       m2.getParameterTypes());
     }
 
     /**
@@ -162,6 +169,6 @@ public class ClassHandler {
      *         ClassHandler.
      */
     public Method[] getMethods() {
-        return methods.toArray(new Method[methods.size()]);
+        return methods;
     }
 }
