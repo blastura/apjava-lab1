@@ -1,6 +1,6 @@
 /*
  * @(#)ClassHandler.java
- * Time-stamp: "2008-11-15 15:09:26 anton"
+ * Time-stamp: "2008-11-16 14:42:48 anton"
  */
 
 import java.lang.reflect.Constructor;
@@ -16,7 +16,7 @@ import java.util.logging.Logger;
  * @version 1.0
  */
 public class ClassHandler {
-    private Object cI;
+    private Plugable classInstance;
     private Method[] methods;
     private static Logger logger = Logger.getLogger("mytoolbox");
     
@@ -43,6 +43,13 @@ public class ClassHandler {
         // Get Class of className, and it's implemented class
         // Throws: ClassNotFoundException, IllegalAccessException
         Class<?> c = Class.forName(className);
+        
+        // Create a new instance.
+        // Require: A constructor without parameters
+        // Throws: InstantiationException and
+        //         (RuntimeException) ClassCastException
+        this.classInstance  = (Plugable) c.newInstance();
+        
         Class<?> implInterface = Class.forName("Plugable");
         
         // Get all declared methods
@@ -56,24 +63,20 @@ public class ClassHandler {
         
         // Add all methods to array methods that exists in allMethods but not in
         // implMethods
-        for (int i = 0; i < allMethods.length; i++) {
+        int count = 0;
+        for (Method method : allMethods) {
             for (Method implMethod : implMethods) {
-                //logger.info();
-                if (!isSameMethod(allMethods[i], implMethod)) {
-                    methods[i] = allMethods[i];
+                if (!isSameMethod(method, implMethod)) {
+                    methods[count] = method;
+                    count++;
                     logger.info("Method will be in list: "
-                                + methods[i].getName());
+                                + method.getName());
                 } else {
                     logger.info("Method will be removed from list: "
                                 + implMethod.getName());
                 }
             }
         }
-        
-        // Create a new instance.
-        // Require: A constructor without parameters,
-        // Throws: InstantiationException
-        this.cI  = c.newInstance();
     }
     
     /** Returns true if method has equal name, parameters and returntype, false
@@ -145,7 +148,7 @@ public class ClassHandler {
             params[i] = con.newInstance(args[i]);
         }
         // Could throw IllegalAccessException, InvocationTargetException
-        return method.invoke(cI, params);
+        return method.invoke(classInstance, params);
     }
 
     /**
@@ -155,11 +158,7 @@ public class ClassHandler {
      * @return The describtion of the supplied class.
      */
     public String getDescription() {
-        if (cI instanceof Plugable) {
-            return ((Plugable) cI).getDescription();
-        } else {
-            return "Class does not implement Plugable, no describtion found";
-        }
+        return classInstance.getDescription();
     }
     
     /**

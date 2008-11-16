@@ -1,6 +1,6 @@
 /*
  * @(# )MyToolbox.java
- * Time-stamp: "2008-11-15 15:07:47 anton"
+ * Time-stamp: "2008-11-16 14:17:21 anton"
  */
 
 import java.awt.BorderLayout;
@@ -186,8 +186,11 @@ public class MyToolbox extends JFrame {
                 System.exit(-1);
             } catch (InstantiationException e) {
                 System.out.println("Could not create an instance of this class."
-                                   + " One empty constructor required.");
+                                   + " One empty constructor required");
                 //e.printStackTrace();
+                System.exit(-1);
+            } catch (ClassCastException e) {
+                System.out.println("Class must implement interface Plugable");
                 System.exit(-1);
             } catch (IllegalAccessException e) {
                 // TODO

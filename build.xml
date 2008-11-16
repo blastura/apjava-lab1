@@ -57,7 +57,7 @@
     </javadoc>
   </target>
 
-  <target name="run" description="Run MyToolbox" depends="compile">
+  <target name="test-run" description="Run MyToolbox" depends="compile">
     <java classname="MyToolbox" fork="true">
       <classpath refid="project.classpath" />
       <arg value="Calc"/>
