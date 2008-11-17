@@ -19,7 +19,9 @@
 \def\mail{dit06ajn@cs.umu.se}
  \def\pathtocode{$\sim$dit06ajn/edu/apjava/lab1}
 
-\def\handledareEtt{Johan Eliasson johane@cs.umu.se}
+\def\handledareEtt{Johan Eliasson, johane@cs.umu.se}
+\def\handledareTva{Tor Sterner-Johansson, tors@cs.umu.se}
+\def\handledareTre{Daniel Henriksson, danielh@cs.umu.se}
 \def\inst{datavetenskap}
 \def\dokumentTyp{Laborationsrapport}
 
@@ -42,11 +44,13 @@
     \vspace{15mm}
     \begin{large}
         \namn, \mail \\
-        \pathtocode
+        \texttt{\pathtocode}
     \end{large}
     \vfill
     \large{\textbf{Handledare}}\\
     \mbox{\large{\handledareEtt}}
+    \mbox{\large{\handledareTva}}
+    \mbox{\large{\handledareTre}}
   \end{center}
 \end{titlepage}
 
@@ -68,8 +72,8 @@
 % Beskriv med egna ord vad uppgiften gick ut på. Är det någonting som
 % varit oklart och ni gjort egna tolkningar så beskriv dessa.
 Denna laboration gick ut på att skriva ett Javaprogram som använder
-sig av Javas paket \textit{java.lang.reflect}. Paketet har funktioner
-som gör det möjligt att inspektera, instansera, modifiera och exekvera
+sig av Javas paket \textit{java.lang.reflect}. Paketet har klasser som
+gör det möjligt att inspektera, instansera, modifiera och exekvera
 objekt och klasser medan ett program körs.
 
 Till detta program skulle ett grafiskt gränssnitt skrivas. Från det
@@ -82,7 +86,8 @@ Problemspecifikation finns i original på:\\
 \section{Användarhandledning}
 % Förklara var programmet och källkoden ligger samt hur man startar,
 % kompilerar och använder det.
-Programmet ligger i katalogen: \pathtocode
+Programmet ligger i katalogen:\\
+\texttt{\pathtocode}
 
 Från denna katalog kompileras programmet med kommandot:
 
@@ -119,7 +124,8 @@ separerade av mellanslags- eller komma-tecken, i parameterfältet och
 trycker \verb!ENTER!, då körs markerad metod i
 metodlistan. Alternativt kan användaren dubbelklicka på en metod, då
 körs denna metod med de parametrar som finns ifyllda i
-parameterfältet.
+parameterfältet. Eventuell utdata kommer att dyka upp i textfältet
+längst ner i gränssnittet.
 
 \section{Systembeskrivning}
 % Beskriv översiktligt hur programmet är uppbyggt och hur det löser
@@ -172,7 +178,8 @@ bilaga \ref{taw} och \ref{wos}. Detta gäller alla utskrifter som görs
 via metoderna i \textit{System.out}. Eventuella värden som returneras
 från metodanrop skrivs enligt specifikationen inte ut.
 
-Källkod finns i bilaga \ref{mytoolbox.java}.
+Källkod till \textit{MyToolbox.java} finns i bilaga
+\ref{mytoolbox.java}.
 
 \subsection{ClassHandler.java}
 Klassen \textit{ClassHandler} tar emot en textsträng i sin
@@ -190,7 +197,8 @@ beskrivning av den laddade klassen, denna metod anropar den laddade
 klassens metod \textit{getDescription()} som är ett krav från
 gränssnittet \textit{Plugable}.
 
-Källkod finns i bilaga \ref{classhandler.java}.
+Källkod till \textit{ClassHandler.java} finns i bilaga
+\ref{classhandler.java}.
 
 \subsection{Plugable.java}
 Gränssnittet \textit{Plugable} garanterar att klasserna som laddas in i
@@ -255,7 +263,7 @@ exekvering av programmet.
 Nedan följer spårutskrifter som visar på vad som händer vid start av
 program där klassen som laddas inte följer specificerade
 krav. Klasserna \textit{CalcNoEmtpyConstr} och
-\textit{CalcNotPlugable} kan ses i bilage \ref{cnec} coh
+\textit{CalcNotPlugable} kan ses i bilaga \ref{cnec} och
 \ref{cnp}. Klassen \textit{NonExistentClass} finns inte.
 
 \begin{verbatim}
@@ -268,6 +276,7 @@ bash-3.2$ java -cp bin/prod MyToolbox NonExistentClass
 Class not found
 \end{verbatim}
 
+\newpage
 \subsection{Metodanrop}
 Bild i figur \ref{fig:test1-out} visar på metodanrop med parametrarna
 \verb!1 2!, det vill säga metoderna \textit{Calc.add(1, 2)},
@@ -292,6 +301,41 @@ standard är alltid första metoden i listan markerad.
     \label{fig:test1-out}
   \end{center}
 \end{figure}
+
+Testet i figur \ref{fig:test1-out} startades med kommandot:\\
+\verb!java -cp bin/prod MyToolbox Calc!
+
+\newpage
+Bild i figur \ref{fig:test2-out} visar vad som händer om användaren
+försöker anropa metoder med parametrar som inte kan skapas med hjälp
+av en sträng.
+
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[width=110mm]{images/test2-out.png}
+    \caption{Metodanrop NoSuchMethodException}
+    \label{fig:test2-out}
+  \end{center}
+\end{figure}
+
+Testet i figur \ref{fig:test2-out} startades med kommandot:\\
+\verb!java -cp bin/prod MyToolbox CalcPrimitive!
+
+\newpage
+Bild i figur \ref{fig:test3-out} visar vad som händer om användaren har
+angivit felaktiga parametrar, till exempel om metoden har en
+\textit{Integer} som parameter och användaren angett ''hej''.
+
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[width=110mm]{images/test3-out.png}
+    \caption{Metodanrop InvocationTargetException}
+    \label{fig:test3-out}
+  \end{center}
+\end{figure}
+
+Testet i figur \ref{fig:test3-out} startades med kommandot:\\
+\verb!java -cp bin/prod MyToolbox Calc!
 
 \section{Diskussion}
 % Hur fungerade det att följa en kodkonvention? Vilka var fördelarna
@@ -354,6 +398,12 @@ Härefter följer utskrifter från källkoden till denna laboration.
 \subsection{CalcNotPlugable.java}\label{cnp}
 \begin{footnotesize}
 \verbatiminput{../src/CalcNotPlugable.java}
+\end{footnotesize}
+\newpage
+
+\subsection{CalcPrimitive.java}\label{cp}
+\begin{footnotesize}
+\verbatiminput{../src/CalcPrimitive.java}
 \end{footnotesize}
 \newpage
 
