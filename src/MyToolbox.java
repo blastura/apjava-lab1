@@ -1,6 +1,6 @@
 /*
  * @(#)MyToolbox.java
- * Time-stamp: "2008-11-16 23:52:40 anton"
+ * Time-stamp: "2008-11-17 10:40:06 anton"
  */
 
 import java.awt.BorderLayout;
@@ -161,16 +161,14 @@ public class MyToolbox extends JFrame {
             logger.info("Method returned: " + ret);
         } catch (IllegalArgumentException e) {
             // The method has been passed illegal or inappropriate
-            // arguments.
+            // arguments, too many or too few.
             System.out.println(e.getMessage());
         } catch (InvocationTargetException e) {
-            System.out.println("Parameters can't be converted from a String to"
-                               + " the required class");
+            System.out.println("Parameters can't be converted from the supplied"
+                               + " String to the required class.");
         } catch (NoSuchMethodException e) {
-            // The class stored in classHandler doesn't have the specified
-            // method. This should never happen.
-            e.printStackTrace();
-            System.exit(-1);
+            System.out.println("The paramters needed to invoke this method"
+                               + " can't be created from a String.");
         } catch (InstantiationException e) {
             // Should never happen, NoSuchMethodException should be thrown
             // first.
