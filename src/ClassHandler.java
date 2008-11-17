@@ -1,6 +1,6 @@
 /*
  * @(#)ClassHandler.java
- * Time-stamp: "2008-11-16 14:42:48 anton"
+ * Time-stamp: "2008-11-16 23:07:03 anton"
  */
 
 import java.lang.reflect.Constructor;
@@ -9,17 +9,17 @@ import java.lang.reflect.Method;
 import java.util.logging.Logger;
 
 /**
- * ClassHandler is responsible for instanciating and interacting with a supplied
+ * ClassHandler is responsible for instantiating and interacting with a supplied
  * Class.
  *
  * @author dit06ajn@cs.umu.se
  * @version 1.0
  */
 public class ClassHandler {
-    private Plugable classInstance;
     private Method[] methods;
+    private Plugable classInstance;
     private static Logger logger = Logger.getLogger("mytoolbox");
-    
+
     /**
      * Creates a new ClassHandler instance which creates an instance
      * of the specified class in the parameter className and stores
@@ -32,10 +32,10 @@ public class ClassHandler {
      * @exception ClassNotFoundException If the specified className is not a
      *                                   Class in classpath.
      * @exception InstantiationException If the specified Class doesn't have a
-     *                                    constructor without parameters.
+     *                                   constructor without parameters.
      * @exception IllegalAccessException If the specified Class constructor
      *                                   doesn't have access to the definition
-     *                                   of this Constructor? TODO <-
+     *                                   of this Constructor.
      */
     public ClassHandler(String className) throws ClassNotFoundException,
                                                  InstantiationException,
@@ -43,24 +43,24 @@ public class ClassHandler {
         // Get Class of className, and it's implemented class
         // Throws: ClassNotFoundException, IllegalAccessException
         Class<?> c = Class.forName(className);
-        
+
         // Create a new instance.
         // Require: A constructor without parameters
         // Throws: InstantiationException and
         //         (RuntimeException) ClassCastException
         this.classInstance  = (Plugable) c.newInstance();
-        
+
         Class<?> implInterface = Class.forName("Plugable");
-        
+
         // Get all declared methods
         Method[] allMethods = c.getDeclaredMethods();
-        
-        // Methods in interface TODO
+
+        // Methods in interface
         Method[] implMethods = implInterface.getDeclaredMethods();
 
         // To store (allMethods - implMethods)
         this.methods = new Method[allMethods.length - implMethods.length];
-        
+
         // Add all methods to array methods that exists in allMethods but not in
         // implMethods
         int count = 0;
@@ -78,9 +78,9 @@ public class ClassHandler {
             }
         }
     }
-    
-    /** Returns true if method has equal name, parameters and returntype, false
-     * otherwise */
+
+    /* Returns true if supplied methods has equal name, parameters and
+     * return type, false otherwise */
     private static boolean isSameMethod(Method m1, Method m2) {
         return (m1.getName().equals(m2.getName()))
             && m1.getReturnType().equals(m2.getReturnType())
@@ -90,7 +90,7 @@ public class ClassHandler {
 
     /**
      * Creates new instances of the arguments in <code>args</code> with regard
-     * to the required pamreter types in the supplied Method
+     * to the required parameter types in the supplied Method
      * <code>method</code>.
      *
      * @param method The Method to invoke.
@@ -99,19 +99,19 @@ public class ClassHandler {
      * @return The value returned by the invoked Method, if the Method doesn't
      *         return a value, this will be null.
      * @exception IllegalAccessException If the specified method doesn't have
-     *                                   access to the instanciated Class in
-     *                                   this ClassHandler. TODO <-
+     *                                   access to the instantiated Class in
+     *                                   this ClassHandler.
      * @exception InvocationTargetException If an exception is thrown in the
      *                                      invoked Method, the Exception is
      *                                      wrapped in this
      *                                      InvocationTargetException.
      * @exception NoSuchMethodException If the Class stored in this ClassHandler
      *                                  doesn't have the supplied Method.
-     * @exception InstantiationException If one of the argumetns supplied in
+     * @exception InstantiationException If one of the arguments supplied in
      *                                   <code>args</code> can't be converted
      *                                   from a String to the required Class to
      *                                   be used as a parameter in
-     *                                   <code>method</code>.                      
+     *                                   <code>method</code>.
      */
     public Object invoke(Method method, String[] args)
         throws IllegalAccessException,
@@ -120,27 +120,27 @@ public class ClassHandler {
                InstantiationException {
         // Store the Class for each parameter in method.
         Class<?>[] typeParams = method.getParameterTypes();
-        
+
         // For storing type converted parameters.
         Object[] params = new Object[typeParams.length];
-        
+
         if (args.length != typeParams.length) {
-            // TODO params are missing
+            // Too few or to many parameters
             throw new IllegalArgumentException(typeParams.length
                                                + " parameter(s) is required to"
-                                               + " to excecute this method");
+                                               + " to execute this method");
         }
 
         // Loop through all typeParams and args to create an array containing
         // arguments converted to the required class.
         for (int i = 0; i < typeParams.length; i++) {
             Class<?> paramClass = typeParams[i];
-            
+
             // Required: Constructor that takes a String as its only parameter,
             // NoSuchMethodException thrown otherwise.
             Constructor<?> con =
                 paramClass.getConstructor(java.lang.String.class);
-            
+
             // Could (but shouldn't) throw InstantiationException since
             // NoSuchMethodException should be thrown above
             // first. InvocationTargetException is thrown if the supplied value
@@ -152,15 +152,15 @@ public class ClassHandler {
     }
 
     /**
-     * Returns the describtion of the loaded Class. This requires the Class to
+     * Returns the description of the loaded Class. This requires the Class to
      * implement the interface Plugable.
      *
-     * @return The describtion of the supplied class.
+     * @return The description of the supplied class.
      */
     public String getDescription() {
         return classInstance.getDescription();
     }
-    
+
     /**
      * Returns all the methods of the class stored in this ClassHandler.
      *

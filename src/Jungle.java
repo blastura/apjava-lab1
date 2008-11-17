@@ -1,21 +1,33 @@
 /*
  * @(#)Jungle.java
- * Time-stamp: "2008-11-13 18:48:53 anton"
+ * Time-stamp: "2008-11-16 21:48:25 anton"
  */
 
+/**
+ * A simple representation of a Jungle.
+ *
+ * @author Anton Johansson dit06ajn@cs.umu.se
+ * @version 1.0
+ */
 public class Jungle implements Plugable {
     String[] animals;
+    /** Creates a new Jungle, fills an array with some animals. */
     public Jungle() {
         animals = new String[] {"Tiger", "Monkey", "Elephant"};
     }
 
-    public boolean animalIsInDjungle(String animal) {
+    /**
+     * Prints true if the specified animal exists in this Jungle.
+     *
+     * @param animal the animal to check for.
+     */
+    public void animalIsInDjungle(String animal) {
         for (int i = 0; i < animals.length; i++) {
             if (animals[i].equals(animal)) {
-                return true;
+                System.out.println("true");
             }
         }
-        return false;
+        System.out.println("false");
     }
 
     public final String getDescription() {

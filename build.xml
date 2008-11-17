@@ -64,7 +64,7 @@
     </java>
   </target>
 
-  <target name="print-classpath">
+  <target name="print-classpath" description="Prints classpath, convenient for export to emacs and jde-mode">
     <property name="classpath" refid="project.classpath"/>
     <echo message="-classpath-${classpath}-classpath-"/>
   </target>
